@@ -29,7 +29,7 @@ function loop() {
     //clear();
 	
 	//Draw a rect.
-	canvas.fillStyle="#fGffff";
+	canvas.fillStyle="#aabbcc";
     canvas.fillRect(x, y, RECTWIDTH, RECTHEIGHT);
 }
 
