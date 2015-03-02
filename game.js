@@ -5,6 +5,7 @@ var RECTWIDTH = 100;
 var RECTHEIGHT = 100;
 var PADDING = 10;
 var NUMBEROFTILES = 9;
+var GRIDSIZE = 3;
 
 var mouseX;
 var mouseY; 
@@ -14,8 +15,8 @@ var squares = new Array();
 function init() {
 	//Set up canvas
 	c = document.getElementById('_c');
-	c.width = (RECTWIDTH * 3) + (PADDING * 2);
-	c.height = (RECTHEIGHT * 3) + (PADDING * 2);
+	c.width = (RECTWIDTH * (NUMBEROFTILES/GRIDSIZE)) + (PADDING * (NUMBEROFTILES/GRIDSIZE - 1));
+	c.height = (RECTHEIGHT * (NUMBEROFTILES/GRIDSIZE)) + (PADDING * (NUMBEROFTILES/GRIDSIZE - 1));
 	canvas = c.getContext('2d');
 	
 	//Add mouse click listener
@@ -30,8 +31,8 @@ function init() {
 	}
 	
 	var counter = 0;
-	for(var x = 0; x < NUMBEROFTILES/3; x++){
-		for(var y = 0; y < NUMBEROFTILES/3; y++){
+	for(var x = 0; x < NUMBEROFTILES/GRIDSIZE; x++){
+		for(var y = 0; y < NUMBEROFTILES/GRIDSIZE; y++){
 			squares[counter][0] = x * (RECTWIDTH + PADDING);
 			squares[counter][1] = y * (RECTHEIGHT + PADDING);
 			counter++;
