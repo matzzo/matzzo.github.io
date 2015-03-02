@@ -6,10 +6,23 @@
 		*{
 			margin:0;
 		}
+		canvas { 
+			display:block; 
+		}
+		.gameArea{
+			position:fixed;
+			margin:auto;
+			top:50%;
+			left:50%;
+			margin-top: -160px;
+			margin-left: -160px;
+			background-color:#FF00AA
+		}
 	</style>
 	<body>
+	<div class="gameArea">
 		<canvas id="_c" width="500" height="500"></canvas>
-		<script src='game.js'>
-		</script>
+			<script src='game.js'></script>
+		</div>
 	</body>
 </html>
