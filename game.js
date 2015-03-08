@@ -7,14 +7,48 @@ var PADDING = 10;
 var NUMBEROFTILES = 9;
 var GRIDSIZE = 3;
 var NUMBEROFMOVES = 3;
+var OPERATORS = [
+    {
+        f: function(x, y) {
+            return x + y;
+        },
+        s: "+"
+    },
+    {
+        f: function(x, y) {
+            return x - y;
+        },
+        s: "-"
+    },
+    {
+        f: function(x, y) {
+            return x * y;
+        },
+        s: "x"
+    }
+];
+var OPER_SIZE = 2 * (GRIDSIZE - 1) * GRIDSIZE;
 
 var mouseX;
 var mouseY; 
 var squares = new Array();
+var opers = new Array();
 var goalNumber = 0;
 
 var squareSelected = false;
 var squareSelectedIndex = 0; 
+
+
+
+Math.seed = function(s) {
+    return function() {
+        s = Math.sin(s) * 10000; return s - Math.floor(s);
+    };
+};
+
+// Just making the rng seedable remove to use default rng
+var random1 = Math.seed(42);
+Math.random = Math.seed(random1());
 
 //Init variables
 function init() {
@@ -42,6 +76,8 @@ function init() {
 			squares[counter][1] = y * (RECTHEIGHT + PADDING);	//Y
 			squares[counter][2] = generateTileNumber();
 			squares[counter][3] = generateTileColor(squares[counter][2]);
+			var col = ~~(counter / GRIDSIZE) + 1;
+			generateOperators();
 			counter++;
 		}
 	}
@@ -50,7 +86,15 @@ function init() {
 	canvas.font = "30px Arial";
 	canvas.fillStyle="#000000";
 	canvas.fillText(generateGoalNumber(), 0, 350);
-	
+	canvas.font = "16px Verdana";
+	canvas.strokeStyle = "#BD26BD";
+	canvas.fillStyle = "#BD26BD";
+	for (var i = 0; i < 9; i++){
+		// canvas.strokeText(getOperatorText(i, i + 1), squares[i][0] + (RECTWIDTH / 2), squares[i][1] + RECTHEIGHT + PADDING);
+		canvas.fillText(getOperatorText(i, i + 1), squares[i][0] + (RECTWIDTH / 2), squares[i][1] + RECTHEIGHT + PADDING);
+		// canvas.strokeText(getOperatorText(i, i + GRIDSIZE), squares[i][0] + RECTWIDTH, squares[i][1] - (RECTHEIGHT / 2));
+		canvas.fillText(getOperatorText(i, i + GRIDSIZE), squares[i][0] + RECTWIDTH, squares[i][1] - (RECTHEIGHT / 2));
+	}
 	//Set the interview for the loop.
     setInterval(loop, 15);
 }
@@ -80,6 +124,12 @@ function loop() {
 	}
 }
 
+function generateOperators(){
+	for (var i = 0; i < 2 * (GRIDSIZE - 1) * GRIDSIZE; i++){
+		opers[i] = (Math.floor((Math.random() * 3)));
+	}
+}
+
 function generateTileColor(index){
 	var color = "#FFFFFF";
 	
@@ -96,6 +146,42 @@ function generateTileColor(index){
 	}
 	
 	return color;
+}
+
+function applyOperator(currentTileIndex, nextTileIndex){
+	return getOperator(currentTileIndex, nextTileIndex).f(squares[currentTileIndex][2], squares[nextTileIndex][2]);
+}
+
+function getOperatorText(currentTileIndex, nextTileIndex){
+	var o = getOperator(currentTileIndex, nextTileIndex);
+	if (o == null)
+		return "";
+	return o.s;
+}
+
+//takes a tile (by index), and the next tile and returns the corresponding operator
+function getOperator(currentTileIndex, nextTileIndex){  
+	var col = ~~(currentTileIndex / GRIDSIZE);
+	if(currentTileIndex == nextTileIndex - 1){
+		if(nextTileIndex % GRIDSIZE != 0){
+			return OPERATORS[opers[currentTileIndex + (0) + (GRIDSIZE - 1) * col]];
+		}
+	}
+	else if(currentTileIndex == nextTileIndex + 1){
+		if((nextTileIndex - 2) % GRIDSIZE != 0){
+			return OPERATORS[opers[currentTileIndex + (-1) + (GRIDSIZE - 1) * col]];
+		}
+	}
+	else if(currentTileIndex == nextTileIndex - GRIDSIZE){
+		if(nextTileIndex > GRIDSIZE - 1){
+			return OPERATORS[opers[currentTileIndex + (2) + (GRIDSIZE - 1) * col]];
+		}
+	}
+	else if(currentTileIndex == nextTileIndex + GRIDSIZE){
+		if(nextTileIndex < NUMBEROFTILES - GRIDSIZE){
+			return OPERATORS[opers[currentTileIndex + (-3) + (GRIDSIZE - 1) * col]];
+		}
+	}
 }
 
 function generateTileNumber(){
@@ -135,7 +221,7 @@ function generateGoalNumber(){
 				if(currentTile % GRIDSIZE != 0){
 					nextTile = currentTile - 1;
 					validMove = true; 
-					console.log("Move: UP");
+					console.log("Move: UP " + getOperatorText(currentTile, nextTile));
 				}
 			}
 			break; 
@@ -144,7 +230,7 @@ function generateGoalNumber(){
 				if((currentTile - 2) % GRIDSIZE != 0){
 					nextTile = currentTile + 1;
 					validMove = true; 
-					console.log("Move: DOWN");
+					console.log("Move: DOWN " + getOperatorText(currentTile, nextTile));
 				}
 			}
 			break; 	
@@ -153,7 +239,7 @@ function generateGoalNumber(){
 				if(currentTile > GRIDSIZE - 1){
 					nextTile = currentTile - 3;
 					validMove = true;
-					console.log("Move: LEFT");
+					console.log("Move: LEFT " + getOperatorText(currentTile, nextTile));
 				}
 			}
 			break;	
@@ -162,7 +248,7 @@ function generateGoalNumber(){
 				if(currentTile < NUMBEROFTILES - GRIDSIZE){
 					nextTile = currentTile + 3;
 					validMove = true;
-					console.log("Move: RIGHT");
+					console.log("Move: RIGHT " + getOperatorText(currentTile, nextTile));
 				}
 			}
 			break;	
@@ -170,7 +256,8 @@ function generateGoalNumber(){
 		
 		if(validMove == true){
 			//Add the number on the square of the next tile to the total.
-			totalNumber += squares[nextTile][2];
+
+			totalNumber = applyOperator(currentTile, nextTile);
 			
 			//Change the old number out.
 			squares[nextTile][2] = totalNumber;
@@ -234,14 +321,15 @@ function onClick(e) {
 					else if(i == squareSelectedIndex + 1){
 						if((squareSelectedIndex - 2) % GRIDSIZE != 0){
 							validMove = true; 
+
 						}
 					}
-					else if(i == squareSelectedIndex - 3){
+					else if(i == squareSelectedIndex - GRIDSIZE){
 						if(squareSelectedIndex > GRIDSIZE - 1){
 							validMove = true;
 						}
 					}
-					else if(i == squareSelectedIndex + 3){
+					else if(i == squareSelectedIndex + GRIDSIZE){
 						if(squareSelectedIndex < NUMBEROFTILES - GRIDSIZE){
 							validMove = true;
 						}
@@ -249,7 +337,7 @@ function onClick(e) {
 					
 					if(validMove == true){
 						//Change the new number
-						squares[i][2] = squares[i][2] + squares[squareSelectedIndex][2];
+						squares[i][2] = applyOperator(squareSelectedIndex, i);
 						squares[i][3] = generateTileColor(squares[i][2]);
 					
 						//Change the old number
