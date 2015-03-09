@@ -120,7 +120,7 @@ function loop() {
 		canvas.lineWidth = 4;
 		canvas.strokeStyle = 'black';
 		canvas.fillStyle="#FFFFFF";
-		canvas.
+		canvas.textAlign = 'center'
 		canvas.strokeText(squares[i][2], squares[i][0] + (RECTWIDTH / 2) - 10, squares[i][1] + (RECTHEIGHT/2) + 10);
 		canvas.fillText(squares[i][2], squares[i][0] + (RECTWIDTH / 2) - 10, squares[i][1] + (RECTHEIGHT/2) + 10);
 	}
