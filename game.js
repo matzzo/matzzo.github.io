@@ -28,7 +28,7 @@ var OPERATORS = [
     }
 ];
 var OPER_SIZE = 2 * (GRIDSIZE - 1) * GRIDSIZE;
-
+var gameover = false;
 var mouseX;
 var mouseY; 
 var squares = new Array();
@@ -105,8 +105,9 @@ function loop() {
 	
 	for(var i = 0; i < NUMBEROFTILES; i++){
 		//Check for win
-		if(squares[i][2] == goalNumber){
+		if(squares[i][2] == goalNumber && !gameover){
 			alert("Won!");
+			gameover = true;
 		}
 	
 		//Draw the actual square.
@@ -119,6 +120,7 @@ function loop() {
 		canvas.lineWidth = 4;
 		canvas.strokeStyle = 'black';
 		canvas.fillStyle="#FFFFFF";
+		canvas.
 		canvas.strokeText(squares[i][2], squares[i][0] + (RECTWIDTH / 2) - 10, squares[i][1] + (RECTHEIGHT/2) + 10);
 		canvas.fillText(squares[i][2], squares[i][0] + (RECTWIDTH / 2) - 10, squares[i][1] + (RECTHEIGHT/2) + 10);
 	}
@@ -174,12 +176,12 @@ function getOperator(currentTileIndex, nextTileIndex){
 	}
 	else if(currentTileIndex == nextTileIndex - GRIDSIZE){
 		if(nextTileIndex > GRIDSIZE - 1){
-			return OPERATORS[opers[currentTileIndex + (2) + (GRIDSIZE - 1) * col]];
+			return OPERATORS[opers[currentTileIndex + (GRIDSIZE) + (GRIDSIZE - 1) * col]];
 		}
 	}
 	else if(currentTileIndex == nextTileIndex + GRIDSIZE){
 		if(nextTileIndex < NUMBEROFTILES - GRIDSIZE){
-			return OPERATORS[opers[currentTileIndex + (-3) + (GRIDSIZE - 1) * col]];
+			return OPERATORS[opers[currentTileIndex + (-1 * GRIDSIZE) + (GRIDSIZE - 1) * col]];
 		}
 	}
 }
