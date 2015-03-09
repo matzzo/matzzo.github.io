@@ -38,18 +38,6 @@ var goalNumber = 0;
 var squareSelected = false;
 var squareSelectedIndex = 0; 
 
-
-
-Math.seed = function(s) {
-    return function() {
-        s = Math.sin(s) * 10000; return s - Math.floor(s);
-    };
-};
-
-// Just making the rng seedable remove to use default rng
-var random1 = Math.seed(42);
-Math.random = Math.seed(random1());
-
 //Init variables
 function init() {
 	//Set up canvas
@@ -120,7 +108,7 @@ function loop() {
 		canvas.lineWidth = 4;
 		canvas.strokeStyle = 'black';
 		canvas.fillStyle="#FFFFFF";
-		canvas.textAlign = 'center'
+		canvas.textAlign = 'center';
 		canvas.strokeText(squares[i][2], squares[i][0] + (RECTWIDTH / 2) - 10, squares[i][1] + (RECTHEIGHT/2) + 10);
 		canvas.fillText(squares[i][2], squares[i][0] + (RECTWIDTH / 2) - 10, squares[i][1] + (RECTHEIGHT/2) + 10);
 	}
