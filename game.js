@@ -47,7 +47,7 @@ var opers = new Array();
 var goalNumber = 0;
 
 var squareSelected = false;
-var squareSelectedIndex = 0; 
+var squareSelectedIndex = -1; 
 
 function init() {
 	//Set up canvas
