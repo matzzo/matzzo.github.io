@@ -42,9 +42,11 @@ var squareSelectedIndex = 0;
 function init() {
 	//Set up canvas
 	c = document.getElementById('_c');
-	c.width = (RECTWIDTH * (NUMBEROFTILES/GRIDSIZE)) + (PADDING * (NUMBEROFTILES/GRIDSIZE - 1));
-	c.height = (RECTHEIGHT * (NUMBEROFTILES/GRIDSIZE)) + (PADDING * (NUMBEROFTILES/GRIDSIZE - 1)) + 50;
+	c.width = ((RECTWIDTH * (NUMBEROFTILES/GRIDSIZE)) + (PADDING * (NUMBEROFTILES/GRIDSIZE - 1)));
+	c.height = ((RECTHEIGHT * (NUMBEROFTILES/GRIDSIZE)) + (PADDING * (NUMBEROFTILES/GRIDSIZE - 1)) + 50);
 	canvas = c.getContext('2d');
+	canvas.style.width = window.innerWidth + 'px';
+	canvas.style.height = window.innerHeight + 'px';
 	
 	//Add mouse click listener
     c.addEventListener("click", onClick, false);
@@ -57,6 +59,7 @@ function init() {
 		squares[i] = new Array();
 	}
 	
+	generateOperators();
 	var counter = 0;
 	for(var x = 0; x < NUMBEROFTILES/GRIDSIZE; x++){
 		for(var y = 0; y < NUMBEROFTILES/GRIDSIZE; y++){			
@@ -64,8 +67,6 @@ function init() {
 			squares[counter][1] = y * (RECTHEIGHT + PADDING);	//Y
 			squares[counter][2] = generateTileNumber();
 			squares[counter][3] = generateTileColor(squares[counter][2]);
-			var col = ~~(counter / GRIDSIZE) + 1;
-			generateOperators();
 			counter++;
 		}
 	}
@@ -180,7 +181,7 @@ function generateTileNumber(){
 }
 
 function updateTileNumber(ogNum){
-	return ogNum * 2;
+	return ogNum * 1;
 }
 
 function generateGoalNumber(){
