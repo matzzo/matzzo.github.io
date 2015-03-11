@@ -77,14 +77,20 @@ function init() {
 	
 	var validGoalFound = false;
 	var goalNum = null;
-	
+	var tries = 0;
 	while(!validGoalFound){
 		goalNum = generateGoalNumber();
-		
+		if(tries > 10) {
+			tries = 0;
+			generateOperators();
+			continue;
+		}
 		//Need to add a check here to see if the number is valid. 
-		validGoalFound = true;
+		if (goalNum < 100 && goalNum > 9)
+			validGoalFound = true;
+		tries++;
 	}
-	
+	goalNumber = goalNum;
 	canvas.fillText("Goal Number: " + goalNum, PADDING, PADDING + (TOPPADDING / 2));
 	
 	//Set the interview for the loop.
@@ -229,8 +235,8 @@ function generateGoalNumber(){
 	var totalNumber = squares[currentTile][2];
 	var validMove = false; 
 	var nextTile = null;
-	
-	for(var i = 0; i < NUMBEROFMOVES; i++){
+	numMoves = NUMBEROFMOVES;
+	for(var i = 0; i < numMoves; i++){
 		
 		//Check all the possible routes (up, down, left, right)
 		var num = Math.floor((Math.random() * 4));
@@ -289,7 +295,7 @@ function generateGoalNumber(){
 			console.log("VALID MOVE");
 		}
 		else{
-			NUMBEROFMOVES++;
+			numMoves++;
 		}
 	}
 	
@@ -297,8 +303,6 @@ function generateGoalNumber(){
 	for(var i = 0; i < squares.length; i++){
 		squares[i][2] = oldSquaresNumbers[i];
 	}
-	
-	goalNumber = totalNumber;
 	return totalNumber;
 }
 
@@ -332,6 +336,9 @@ function onClick(e) {
 		if(tempx < squares[i][0] + RECTWIDTH && tempx > squares[i][0]){
 			if(tempy < squares[i][1] + RECTHEIGHT && tempy > squares[i][1])
 			{
+				if (squareSelectedIndex == i){
+					return;
+				}
 				if(squareSelected == false){
 					//Change the color of the square that was clicked
 					squares[i][3] = "#CD2626";
