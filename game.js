@@ -1,12 +1,20 @@
-//Benjamin Snoha
+/*
+* Programmed by:
+* Benjamin Snoha & Nathan Saslavsky
+*/
 
+//Canvas
 var c;
-var RECTWIDTH = 100;
-var RECTHEIGHT = 100;
-var PADDING = 10;
+//Constants
 var NUMBEROFTILES = 9;
-var GRIDSIZE = 3;
+var PADDING = 15;
+var TOPPADDING = 100;
+var GRIDSIZE = Math.sqrt(NUMBEROFTILES);
+var RECTWIDTH = ((window.innerHeight - TOPPADDING) / (GRIDSIZE + 1));
+var RECTHEIGHT = ((window.innerHeight - TOPPADDING) / (GRIDSIZE + 1));
+
 var NUMBEROFMOVES = 3;
+
 var OPERATORS = [
     {
         f: function(x, y) {
@@ -27,7 +35,10 @@ var OPERATORS = [
         s: "x"
     }
 ];
+
 var OPER_SIZE = 2 * (GRIDSIZE - 1) * GRIDSIZE;
+
+//Misc. Variables
 var gameover = false;
 var mouseX;
 var mouseY; 
@@ -38,18 +49,15 @@ var goalNumber = 0;
 var squareSelected = false;
 var squareSelectedIndex = 0; 
 
-//Init variables
 function init() {
 	//Set up canvas
 	c = document.getElementById('_c');
-	c.width = ((RECTWIDTH * (NUMBEROFTILES/GRIDSIZE)) + (PADDING * (NUMBEROFTILES/GRIDSIZE - 1)));
-	c.height = ((RECTHEIGHT * (NUMBEROFTILES/GRIDSIZE)) + (PADDING * (NUMBEROFTILES/GRIDSIZE - 1)) + 50);
+	c.width = (RECTWIDTH * (NUMBEROFTILES/GRIDSIZE)) + (PADDING * (NUMBEROFTILES/GRIDSIZE - 1));
+	c.height = (RECTHEIGHT * (NUMBEROFTILES/GRIDSIZE)) + (PADDING * (NUMBEROFTILES/GRIDSIZE - 1)) + TOPPADDING;
 	canvas = c.getContext('2d');
-	canvas.style.width = window.innerWidth + 'px';
-	canvas.style.height = window.innerHeight + 'px';
-	
+
 	//Add mouse click listener
-    c.addEventListener("click", onClick, false);
+	c.addEventListener("click", onClick, false);
 
 	//Clear the screen.
     clear();
@@ -59,48 +67,41 @@ function init() {
 		squares[i] = new Array();
 	}
 	
+	//Generate all the squares + operators
+	generateSquares();
 	generateOperators();
-	var counter = 0;
-	for(var x = 0; x < NUMBEROFTILES/GRIDSIZE; x++){
-		for(var y = 0; y < NUMBEROFTILES/GRIDSIZE; y++){			
-			squares[counter][0] = x * (RECTWIDTH + PADDING);	//X
-			squares[counter][1] = y * (RECTHEIGHT + PADDING);	//Y
-			squares[counter][2] = generateTileNumber();
-			squares[counter][3] = generateTileColor(squares[counter][2]);
-			counter++;
-		}
-	}
 	
 	//Display the goal number
 	canvas.font = "30px Arial";
-	canvas.fillStyle="#000000";
-	canvas.fillText(generateGoalNumber(), 0, 350);
-	canvas.font = "16px Verdana";
-	canvas.strokeStyle = "#BD26BD";
-	canvas.fillStyle = "#BD26BD";
-	for (var i = 0; i < 9; i++){
-		// canvas.strokeText(getOperatorText(i, i + 1), squares[i][0] + (RECTWIDTH / 2), squares[i][1] + RECTHEIGHT + PADDING);
-		canvas.fillText(getOperatorText(i, i + 1), squares[i][0] + (RECTWIDTH / 2), squares[i][1] + RECTHEIGHT + PADDING);
-		// canvas.strokeText(getOperatorText(i, i + GRIDSIZE), squares[i][0] + RECTWIDTH, squares[i][1] - (RECTHEIGHT / 2));
-		canvas.fillText(getOperatorText(i, i + GRIDSIZE), squares[i][0] + RECTWIDTH, squares[i][1] - (RECTHEIGHT / 2));
+	canvas.fillStyle="#FFFFFF";
+	
+	var validGoalFound = false;
+	var goalNum = null;
+	
+	while(!validGoalFound){
+		goalNum = generateGoalNumber();
+		
+		//Need to add a check here to see if the number is valid. 
+		validGoalFound = true;
 	}
+	
+	canvas.fillText("Goal Number: " + goalNum, PADDING, PADDING + (TOPPADDING / 2));
+	
 	//Set the interview for the loop.
     setInterval(loop, 15);
 }
 
-//The game loop
 function loop() {
-    //clear();
-	
 	for(var i = 0; i < NUMBEROFTILES; i++){
+	
 		//Check for win
 		if(squares[i][2] == goalNumber && !gameover){
+			squares[i][3] = "#26CD26";
 			alert("Won!");
 			gameover = true;
 		}
 	
-		//Draw the actual square.
-		//Draw a rect.
+		//Draw the actual squares
 		canvas.fillStyle = squares[i][3];
 		canvas.fillRect(squares[i][0], squares[i][1], RECTWIDTH, RECTHEIGHT);
 		
@@ -110,13 +111,37 @@ function loop() {
 		canvas.strokeStyle = 'black';
 		canvas.fillStyle="#FFFFFF";
 		canvas.textAlign = 'center';
-		canvas.strokeText(squares[i][2], squares[i][0] + (RECTWIDTH / 2) - 10, squares[i][1] + (RECTHEIGHT/2) + 10);
-		canvas.fillText(squares[i][2], squares[i][0] + (RECTWIDTH / 2) - 10, squares[i][1] + (RECTHEIGHT/2) + 10);
+		canvas.strokeText("  " + squares[i][2], squares[i][0] + (RECTWIDTH / 2) - PADDING, squares[i][1] + (RECTHEIGHT/2) + PADDING);
+		canvas.fillText("  " + squares[i][2], squares[i][0] + (RECTWIDTH / 2) - PADDING, squares[i][1] + (RECTHEIGHT/2) + PADDING);
+	}
+	
+	//Draw the operators
+	canvas.font = "16px Verdana";
+	canvas.fillStyle = "#FFFFFF";
+	
+	for (var i = 0; i < NUMBEROFTILES; i++){
+		//Bottom
+		canvas.fillText(getOperatorText(i, i + 1), squares[i][0] + (RECTWIDTH / 2), squares[i][1] + RECTHEIGHT + PADDING);
+		//Right
+		canvas.fillText(getOperatorText(i, i + GRIDSIZE), squares[i][0] + RECTWIDTH + PADDING / 2, squares[i][1] + (RECTHEIGHT / 2));
+	}
+}
+
+function generateSquares(){
+	var counter = 0;
+	for(var x = 0; x < NUMBEROFTILES/GRIDSIZE; x++){
+		for(var y = 0; y < NUMBEROFTILES/GRIDSIZE; y++){			
+			squares[counter][0] = x * (RECTWIDTH + PADDING);				//X
+			squares[counter][1] = (y * (RECTHEIGHT + PADDING)) + TOPPADDING;	//Y
+			squares[counter][2] = generateTileNumber();						//Value
+			squares[counter][3] = generateTileColor(squares[counter][2]);	//Color
+			counter++;
+		}
 	}
 }
 
 function generateOperators(){
-	for (var i = 0; i < 2 * (GRIDSIZE - 1) * GRIDSIZE; i++){
+	for (var i = 0; i < OPER_SIZE; i++){
 		opers[i] = (Math.floor((Math.random() * 3)));
 	}
 }
@@ -145,8 +170,11 @@ function applyOperator(currentTileIndex, nextTileIndex){
 
 function getOperatorText(currentTileIndex, nextTileIndex){
 	var o = getOperator(currentTileIndex, nextTileIndex);
-	if (o == null)
+	
+	if (o == null){
 		return "";
+	}
+	
 	return o.s;
 }
 
@@ -165,7 +193,7 @@ function getOperator(currentTileIndex, nextTileIndex){
 	}
 	else if(currentTileIndex == nextTileIndex - GRIDSIZE){
 		if(nextTileIndex > GRIDSIZE - 1){
-			return OPERATORS[opers[currentTileIndex + (GRIDSIZE) + (GRIDSIZE - 1) * col]];
+			return OPERATORS[opers[currentTileIndex + (GRIDSIZE) + (GRIDSIZE - 1) * col - 1]];
 		}
 	}
 	else if(currentTileIndex == nextTileIndex + GRIDSIZE){
@@ -180,13 +208,15 @@ function generateTileNumber(){
 	return Math.floor((Math.random() * NUMBEROFTILES) + 1);
 }
 
+//This decides the value of a tile after it has been moved
 function updateTileNumber(ogNum){
 	return ogNum * 1;
 }
 
 function generateGoalNumber(){
-	//All of this is based off a copy of the original grid.
+	//All of this is based off a copy of the original grid, so we make a copy.
 	var oldSquaresNumbers = new Array(); 
+	
 	for(var i = 0; i < squares.length; i++){
 		oldSquaresNumbers[i] = squares[i][2];
 	}
@@ -212,7 +242,7 @@ function generateGoalNumber(){
 				if(currentTile % GRIDSIZE != 0){
 					nextTile = currentTile - 1;
 					validMove = true; 
-					console.log("Move: UP " + getOperatorText(currentTile, nextTile));
+					console.log("Move: UP " + "| OPERATOR: " + getOperatorText(currentTile, nextTile));
 				}
 			}
 			break; 
@@ -221,7 +251,7 @@ function generateGoalNumber(){
 				if((currentTile - 2) % GRIDSIZE != 0){
 					nextTile = currentTile + 1;
 					validMove = true; 
-					console.log("Move: DOWN " + getOperatorText(currentTile, nextTile));
+					console.log("Move: DOWN " + "| OPERATOR: " + getOperatorText(currentTile, nextTile));
 				}
 			}
 			break; 	
@@ -230,7 +260,7 @@ function generateGoalNumber(){
 				if(currentTile > GRIDSIZE - 1){
 					nextTile = currentTile - 3;
 					validMove = true;
-					console.log("Move: LEFT " + getOperatorText(currentTile, nextTile));
+					console.log("Move: LEFT " + "| OPERATOR: " + getOperatorText(currentTile, nextTile));
 				}
 			}
 			break;	
@@ -239,7 +269,7 @@ function generateGoalNumber(){
 				if(currentTile < NUMBEROFTILES - GRIDSIZE){
 					nextTile = currentTile + 3;
 					validMove = true;
-					console.log("Move: RIGHT " + getOperatorText(currentTile, nextTile));
+					console.log("Move: RIGHT " + "| OPERATOR: " +getOperatorText(currentTile, nextTile));
 				}
 			}
 			break;	
@@ -261,9 +291,6 @@ function generateGoalNumber(){
 		else{
 			NUMBEROFMOVES++;
 		}
-		
-		console.log(i);
-		console.log("Total: " + totalNumber);
 	}
 	
 	//Reset the numbers on the grid now that the path has been generated. 
@@ -277,8 +304,20 @@ function generateGoalNumber(){
 
 //Clear the screen.
 function clear() {
-    canvas.fillStyle="#ffffff";
-    canvas.fillRect(0, 0, c.width, c.height);
+	//Set the background color
+	canvas.rect(0, 0, c.width, c.height);
+	
+	/*
+	// create radial gradient
+	var grd = canvas.createRadialGradient(238, 50, 10, 238, 50, 300);
+	// light blue
+	grd.addColorStop(0, '#8ED6FF');
+	// dark blue
+	grd.addColorStop(1, '#004CB3');
+	*/
+
+	canvas.fillStyle = "#000000";
+	canvas.fill();
 }
 
 //When the user clicks. 
@@ -325,6 +364,14 @@ function onClick(e) {
 							validMove = true;
 						}
 					}
+					else if(i == squareSelectedIndex){
+						squares[i][3] = generateTileColor(squares[i][2]);
+						squareSelected = false; 
+						squareSelectedIndex = i;
+					}
+					else{
+						alert("Invalid move!");
+					}
 					
 					if(validMove == true){
 						//Change the new number
@@ -334,10 +381,9 @@ function onClick(e) {
 						//Change the old number
 						squares[squareSelectedIndex][2] = updateTileNumber(squares[squareSelectedIndex][2]);
 						squares[squareSelectedIndex][3] = generateTileColor(squares[squareSelectedIndex][2]);
-						squareSelected = false; 
-					}
-					else{
-						console.log("Invalid Move: " + i);
+						squareSelected = true;
+						squareSelectedIndex = i; 
+						squares[i][3] = "#CD2626";
 					}
 				}
 			}
