@@ -10,7 +10,7 @@ var c;
 
 //Constants
 var NUMBEROFTILES = 9;
-var TOPPADDING = 100;
+var TOPPADDING = 150;
 var GRIDSIZE = Math.sqrt(NUMBEROFTILES);
 
 var NUMBEROFMOVES = 3;
