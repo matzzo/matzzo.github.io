@@ -10,13 +10,22 @@ var c;
 
 //Constants
 var NUMBEROFTILES = 9;
-var PADDING = 16;
+var PADDING = 20;
 var TOPPADDING = 100;
 var GRIDSIZE = Math.sqrt(NUMBEROFTILES);
+
+var NUMBEROFMOVES = 3;
+var MAXATTEMPTS = 10;
+var MAXGOAL = 1000;
+var MINGOAL = 10;
 
 //The size of the squares are primarily based off the height of the screen. 
 var RECTWIDTH = ((window.innerHeight - TOPPADDING) / (GRIDSIZE + 1));
 var RECTHEIGHT = ((window.innerHeight - TOPPADDING) / (GRIDSIZE + 1));
+
+//This is based off the number of buttons (3)
+var BUTTONWIDTH = 0;
+var BUTTONHEIGHT = 0;
 
 var OPERATORS = [
     {
@@ -40,16 +49,14 @@ var OPERATORS = [
 ];
 
 var OPER_SIZE = 2 * (GRIDSIZE - 1) * GRIDSIZE;
-var NUMBEROFMOVES = 3;
-var MAXATTEMPTS = 10;
-var MAXGOAL = 1000;
-var MINGOAL = 10;
 
 //Misc. Variables
 var gameover = false;
 var mouseX;
 var mouseY; 
 var squares = new Array();
+var squaresBackup = new Array();
+var buttons = new Array();
 var opers = new Array();
 var goalNumber = 0;
 
@@ -60,11 +67,16 @@ function init() {
 	//Set up canvas
 	c = document.getElementById('_c');
 	c.width = (RECTWIDTH * GRIDSIZE) + (PADDING * (GRIDSIZE - 1));
-	c.height = (RECTHEIGHT * GRIDSIZE) + (PADDING * (GRIDSIZE - 1)) + TOPPADDING;
+	c.height = innerHeight;
 	canvas = c.getContext('2d');
 
 	//Add mouse click listener
 	c.addEventListener("click", onClick, false);
+	
+	//Set up some vars
+	//Yes this is hardcoded - who cares
+	BUTTONWIDTH = (c.width - (PADDING * 2)) / 3;
+	BUTTONHEIGHT = (innerHeight - ((GRIDSIZE * RECTHEIGHT) + ((GRIDSIZE - 1) * PADDING) + TOPPADDING));
 
 	//Clear the screen.
     clear();
@@ -77,10 +89,12 @@ function init() {
 	//Generate all the squares + operators
 	generateSquares();
 	generateOperators();
+	generateButtons();
 	
 	//Display the goal number
-	canvas.font = "30px Arial";
+	canvas.font = getFont(0.1);
 	canvas.fillStyle="#FFFFFF";
+	var fontSize = canvas.font.replace(/\D+$/g, "");
 	
 	//Repeated attempt to find a valid path. 
 	var validGoalFound = false;
@@ -104,7 +118,7 @@ function init() {
 	}
 	goalNumber = goalNum;
 	
-	canvas.fillText("Goal Number: " + goalNumber, PADDING, PADDING + (TOPPADDING / 2));
+	canvas.fillText("Goal Number: " + goalNumber, PADDING, fontSize * 1.5);
 	
 	//Set the interview for the loop.
     setInterval(loop, 15);
@@ -125,26 +139,70 @@ function loop() {
 		canvas.fillRect(squares[i][0], squares[i][1], RECTWIDTH, RECTHEIGHT);
 		
 		//Draw the number on the square. 
-		canvas.font = "40px Verdana";
+		canvas.font = getFont(RECTWIDTH * 0.0016);
+		var fontSize = canvas.font.replace(/\D+$/g, "");
+		
 		canvas.lineWidth = 4;
 		canvas.strokeStyle = '#000000';
 		canvas.fillStyle="#FFFFFF";
 		canvas.textAlign = 'center';
-		canvas.strokeText("  " + squares[i][2], squares[i][0] + (RECTWIDTH / 2) - PADDING, squares[i][1] + (RECTHEIGHT/2) + PADDING);
-		canvas.fillText("  " + squares[i][2], squares[i][0] + (RECTWIDTH / 2) - PADDING, squares[i][1] + (RECTHEIGHT/2) + PADDING);
+		canvas.strokeText("  " + squares[i][2], squares[i][0] + (RECTWIDTH / 2) - (fontSize / 3), squares[i][1] + (RECTHEIGHT / 2) + (fontSize / 3));
+		canvas.fillText("  " + squares[i][2], squares[i][0] + (RECTWIDTH / 2) - (fontSize / 3), squares[i][1] + (RECTHEIGHT / 2) + (fontSize / 3));
 	}
 	
 	//Draw the operators
-	canvas.font = "15px Verdana";
+	canvas.font = getFont(0.05);
+	var fontSize = canvas.font.replace(/\D+$/g, "");
+	
 	canvas.fillStyle="#FFFFFF";
 	canvas.textAlign = 'center';
 	
 	for (var i = 0; i < NUMBEROFTILES; i++){
 		//Bottom
-		canvas.fillText(getOperatorText(i, i + 1), squares[i][0] + (RECTWIDTH / 2), squares[i][1] + RECTHEIGHT + (PADDING * .75));
+		canvas.fillText(getOperatorText(i, i + 1), squares[i][0] + (RECTWIDTH / 2), squares[i][1] + RECTHEIGHT + (fontSize * 2/3));
 		//Right
-		canvas.fillText(getOperatorText(i, i + GRIDSIZE), squares[i][0] + RECTWIDTH + (PADDING * .5), squares[i][1] + (RECTHEIGHT / 2));
+		canvas.fillText(getOperatorText(i, i + GRIDSIZE), squares[i][0] + RECTWIDTH + (PADDING / 2), squares[i][1] + (RECTHEIGHT / 2) + (fontSize / 3));
 	}
+	
+	//Draw the buttons below the grid
+	for(var i = 0; i < buttons.length; i++){
+		canvas.fillStyle = buttons[i][3];
+		canvas.fillRect(buttons[i][0], buttons[i][1], BUTTONWIDTH, BUTTONHEIGHT);
+		
+		//Draw the text on the button. 
+		canvas.font = getFont(BUTTONHEIGHT * 0.0010);
+		var fontSize = canvas.font.replace(/\D+$/g, "");
+		
+		canvas.lineWidth = 4;
+		canvas.strokeStyle = '#000000';
+		canvas.fillStyle="#FFFFFF";
+		canvas.textAlign = 'center';
+		canvas.strokeText("  " + buttons[i][2], buttons[i][0] + (BUTTONWIDTH / 2) - (fontSize * 1/3), buttons[i][1] + (BUTTONHEIGHT/2) + fontSize * 1/3);
+		canvas.fillText("  " + buttons[i][2], buttons[i][0] + (BUTTONWIDTH /2) - (fontSize * 1/3), buttons[i][1] + (BUTTONHEIGHT/2) + fontSize * 1/3);
+	}
+}
+
+function generateButtons(){
+	//Reset button
+	buttons[0] = new Array();
+	buttons[0][0] = 0;
+	buttons[0][1] = c.height - (innerHeight - ((GRIDSIZE * RECTHEIGHT) + ((GRIDSIZE - 1) * PADDING) + TOPPADDING));
+	buttons[0][2] = "Reset";
+	buttons[0][3] = "#CC0000";
+	
+	//Undo button
+	buttons[1] = new Array();
+	buttons[1][0] = BUTTONWIDTH + PADDING;
+	buttons[1][1] = c.height - (innerHeight - ((GRIDSIZE * RECTHEIGHT) + ((GRIDSIZE - 1) * PADDING) + TOPPADDING));
+	buttons[1][2] = "Undo";
+	buttons[1][3] = "#7A0000";
+	
+	//Hint button
+	buttons[2] = new Array();
+	buttons[2][0] = (BUTTONWIDTH * 2) + (PADDING * 2);
+	buttons[2][1] = c.height - (innerHeight - ((GRIDSIZE * RECTHEIGHT) + ((GRIDSIZE - 1) * PADDING) + TOPPADDING));
+	buttons[2][2] = "Hint";
+	buttons[2][3] = "#CC0000";
 }
 
 function generateSquares(){
@@ -234,6 +292,11 @@ function updateTileNumber(ogNum){
 	return ogNum * 1;
 }
 
+function getFont(ratio){
+	var size = c.width * ratio;
+	return (size|0) + 'px Verdana';
+}
+
 function generateGoalNumber(){
 	//All of this is based off a copy of the original grid, so we make a copy.
 	var oldSquaresNumbers = new Array(); 
@@ -317,6 +380,8 @@ function generateGoalNumber(){
 		squares[i][2] = oldSquaresNumbers[i];
 	}
 	
+	squaresBackup = oldSquaresNumbers;
+	
 	return totalNumber;
 }
 
@@ -334,11 +399,10 @@ function onClick(e) {
     var tempx = e.clientX - rect.left;     // get mouse x and adjust for el.
     var tempy = e.clientY - rect.top;      // get mouse y and adjust for el.
 	
-	//Check that the click is within the square. 
+	//Check that the click is within a square. 
 	for(var i = 0; i < NUMBEROFTILES; i++){
 		if(tempx < squares[i][0] + RECTWIDTH && tempx > squares[i][0]){
-			if(tempy < squares[i][1] + RECTHEIGHT && tempy > squares[i][1])
-			{
+			if(tempy < squares[i][1] + RECTHEIGHT && tempy > squares[i][1]){
 				if(squareSelected == false){
 					//Change the color of the square that was clicked
 					squares[i][3] = "#CD2626";
@@ -393,6 +457,15 @@ function onClick(e) {
 					}
 				}
 			}
+		}
+	}
+	
+	//If it is not, then they clicks somehwhere else	
+	
+	//Clicked the reset button
+	if(tempx < buttons[0][0] + RECTWIDTH && tempx > buttons[0][0]){
+		if(tempy < buttons[0][1] + RECTHEIGHT && tempy > buttons[0][1]){
+			//Reset buttons using backup? sqauresBackup
 		}
 	}
 }
