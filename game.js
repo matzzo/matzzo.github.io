@@ -10,7 +10,6 @@ var c;
 
 //Constants
 var NUMBEROFTILES = 9;
-var PADDING = 20;
 var TOPPADDING = 100;
 var GRIDSIZE = Math.sqrt(NUMBEROFTILES);
 
@@ -66,7 +65,7 @@ var squareSelectedIndex = 0;
 function init() {
 	//Set up canvas
 	c = document.getElementById('_c');
-	c.width = (RECTWIDTH * GRIDSIZE) + (PADDING * (GRIDSIZE - 1));
+	c.width = RECTWIDTH * GRIDSIZE;
 	c.height = innerHeight;
 	canvas = c.getContext('2d');
 
@@ -75,8 +74,8 @@ function init() {
 	
 	//Set up some vars
 	//Yes this is hardcoded - who cares
-	BUTTONWIDTH = (c.width - (PADDING * 2)) / 3;
-	BUTTONHEIGHT = (innerHeight - ((GRIDSIZE * RECTHEIGHT) + ((GRIDSIZE - 1) * PADDING) + TOPPADDING));
+	BUTTONWIDTH = (c.width) / 3;
+	BUTTONHEIGHT = (innerHeight - ((GRIDSIZE * RECTHEIGHT) + TOPPADDING));
 
 	//Clear the screen.
     clear();
@@ -94,6 +93,7 @@ function init() {
 	//Display the goal number
 	canvas.font = getFont(0.1);
 	canvas.fillStyle="#FFFFFF";
+	canvas.textAlign = 'center';
 	var fontSize = canvas.font.replace(/\D+$/g, "");
 	
 	//Repeated attempt to find a valid path. 
@@ -118,7 +118,7 @@ function init() {
 	}
 	goalNumber = goalNum;
 	
-	canvas.fillText("Goal Number: " + goalNumber, PADDING, fontSize * 1.5);
+	canvas.fillText("Goal Number: " + goalNumber, c.width / 2, fontSize);
 	
 	//Set the interview for the loop.
     setInterval(loop, 15);
@@ -154,14 +154,22 @@ function loop() {
 	canvas.font = getFont(0.05);
 	var fontSize = canvas.font.replace(/\D+$/g, "");
 	
+	canvas.lineWidth = 4;
+	canvas.strokeStyle = '#000000';
 	canvas.fillStyle="#FFFFFF";
 	canvas.textAlign = 'center';
 	
 	for (var i = 0; i < NUMBEROFTILES; i++){
+	
 		//Bottom
-		canvas.fillText(getOperatorText(i, i + 1), squares[i][0] + (RECTWIDTH / 2), squares[i][1] + RECTHEIGHT + (fontSize * 2/3));
+		if((i + 1) % GRIDSIZE != 0){
+			canvas.strokeText(getOperatorText(i, i + 1), squares[i][0] + (RECTWIDTH / 2), squares[i][1] + RECTHEIGHT + (fontSize / 3));
+			canvas.fillText(getOperatorText(i, i + 1), squares[i][0] + (RECTWIDTH / 2), squares[i][1] + RECTHEIGHT + (fontSize / 3));
+		}
+		
 		//Right
-		canvas.fillText(getOperatorText(i, i + GRIDSIZE), squares[i][0] + RECTWIDTH + (PADDING / 2), squares[i][1] + (RECTHEIGHT / 2) + (fontSize / 3));
+		canvas.strokeText(getOperatorText(i, i + GRIDSIZE), squares[i][0] + RECTWIDTH, squares[i][1] + (RECTHEIGHT / 2) + (fontSize / 3));
+		canvas.fillText(getOperatorText(i, i + GRIDSIZE), squares[i][0] + RECTWIDTH, squares[i][1] + (RECTHEIGHT / 2) + (fontSize / 3));
 	}
 	
 	//Draw the buttons below the grid
@@ -186,21 +194,21 @@ function generateButtons(){
 	//Reset button
 	buttons[0] = new Array();
 	buttons[0][0] = 0;
-	buttons[0][1] = c.height - (innerHeight - ((GRIDSIZE * RECTHEIGHT) + ((GRIDSIZE - 1) * PADDING) + TOPPADDING));
+	buttons[0][1] = c.height - (innerHeight - ((GRIDSIZE * RECTHEIGHT) + TOPPADDING));
 	buttons[0][2] = "Reset";
 	buttons[0][3] = "#CC0000";
 	
 	//Undo button
 	buttons[1] = new Array();
-	buttons[1][0] = BUTTONWIDTH + PADDING;
-	buttons[1][1] = c.height - (innerHeight - ((GRIDSIZE * RECTHEIGHT) + ((GRIDSIZE - 1) * PADDING) + TOPPADDING));
+	buttons[1][0] = BUTTONWIDTH;
+	buttons[1][1] = c.height - (innerHeight - ((GRIDSIZE * RECTHEIGHT) + TOPPADDING));
 	buttons[1][2] = "Undo";
 	buttons[1][3] = "#7A0000";
 	
 	//Hint button
 	buttons[2] = new Array();
-	buttons[2][0] = (BUTTONWIDTH * 2) + (PADDING * 2);
-	buttons[2][1] = c.height - (innerHeight - ((GRIDSIZE * RECTHEIGHT) + ((GRIDSIZE - 1) * PADDING) + TOPPADDING));
+	buttons[2][0] = (BUTTONWIDTH * 2);
+	buttons[2][1] = c.height - (innerHeight - ((GRIDSIZE * RECTHEIGHT) + TOPPADDING));
 	buttons[2][2] = "Hint";
 	buttons[2][3] = "#CC0000";
 }
@@ -209,8 +217,8 @@ function generateSquares(){
 	var counter = 0;
 	for(var x = 0; x < GRIDSIZE; x++){
 		for(var y = 0; y < GRIDSIZE; y++){			
-			squares[counter][0] = x * (RECTWIDTH + PADDING);					//X
-			squares[counter][1] = (y * (RECTHEIGHT + PADDING)) + TOPPADDING;	//Y
+			squares[counter][0] = x * RECTWIDTH;					//X
+			squares[counter][1] = y * RECTHEIGHT + TOPPADDING;	//Y
 			squares[counter][2] = generateTileNumber();							//Value
 			squares[counter][3] = generateTileColor(squares[counter][2]);		//Color
 			counter++;
@@ -243,7 +251,6 @@ function generateTileColor(index){
 }
 
 function applyOperator(currentTileIndex, nextTileIndex){
-	console.log("INFO: " + " CT: " + currentTileIndex + " NT: " + nextTileIndex);
 	return getOperator(currentTileIndex, nextTileIndex).f(squares[currentTileIndex][2], squares[nextTileIndex][2]);
 }
 
