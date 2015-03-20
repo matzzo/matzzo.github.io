@@ -170,7 +170,7 @@ function loop() {
 		canvas.fillRect(buttons[i][0], buttons[i][1], BUTTONWIDTH, BUTTONHEIGHT);
 		
 		//Draw the text on the button. 
-		canvas.font = getFont(BUTTONHEIGHT * 0.0005);
+		canvas.font = getFont(BUTTONWIDTH * 0.0005);
 		var fontSize = canvas.font.replace(/\D+$/g, "");
 		
 		canvas.lineWidth = 4;
