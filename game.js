@@ -139,7 +139,7 @@ function loop() {
 		canvas.fillRect(squares[i][0], squares[i][1], RECTWIDTH, RECTHEIGHT);
 		
 		//Draw the number on the square. 
-		canvas.font = getFont(RECTWIDTH * 0.0008);
+		canvas.font = getFont(0.1);
 		var fontSize = canvas.font.replace(/\D+$/g, "");
 		
 		canvas.lineWidth = 4;
@@ -170,7 +170,7 @@ function loop() {
 		canvas.fillRect(buttons[i][0], buttons[i][1], BUTTONWIDTH, BUTTONHEIGHT);
 		
 		//Draw the text on the button. 
-		canvas.font = getFont(BUTTONWIDTH * 0.0005);
+		canvas.font = getFont(0.1);
 		var fontSize = canvas.font.replace(/\D+$/g, "");
 		
 		canvas.lineWidth = 4;
